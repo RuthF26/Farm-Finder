@@ -1,0 +1,20 @@
+1001,Sunny Acres Farm,St. Cloud,eggs;honey;tomatoes,Oct-May,true,4.2,2026-09-20
+1004,Kissimmee Citrus,Kissimmee,oranges;grapefruit,Nov-Apr,true,11.0,2026-09-19
+1007,Narcoossee Greens,Narcoossee,eggs;kale;lettuce,Oct-May,true,9.8,2026-09-20
+1009,Holopaw Farm Stand,Holopaw,eggs;honey,Year-round,false,6.0,2026-09-18
+1012,Lakeshore Hens,Harmony,eggs,Year-round,true,13.5,2026-09-20
+1018,Canoe Creek Ranch,St. Cloud,eggs;beef,Year-round,true,18.3,2026-09-16
+1020,Orange Blossom Grove,Kissimmee,oranges;tangerines,Nov-Apr,false,12.1,2026-08-26
+1021,Cypress Creek Vegetables,St. Cloud,tomatoes;peppers;okra,Oct-Jun,true,7.4,2026-10-01
+1022,Boggy Creek Berries,Narcoossee,strawberries;blueberries,Dec-Apr,false,14.8,2026-09-04
+1023,Sunrise Honey Farm,Harmony,honey;beeswax,Year-round,true,5.3,2026-09-30
+1024,South Lake Harvest,St. Cloud,lettuce;spinach;carrots,Oct-May,true,3.9,2026-09-22
+1025,Palmetto Patch Farm,Holopaw,pumpkins;squash,Sep-Dec,false,20.5,2026-09-08
+1026,Oak Hammock Orchard,Kissimmee,peaches;plums,Apr-Jun,false,16.2,2026-08-25
+1027,Pine Island Produce,St. Cloud,green beans;cucumbers,Oct-May,true,8.6,2026-09-15
+1028,Crescent Moon Dairy,Narcoossee,milk;cheese;yogurt,Year-round,false,11.7,2026-09-26
+1029,Meadowgate Flowers,Harmony,sunflowers;cut flowers,Mar-Oct,true,17.1,2026-09-11
+1030,Wildgrass Herb Garden,St. Cloud,basil;mint;rosemary,Year-round,true,2.8,2026-10-03
+1031,Canal Side Roots,Kissimmee,carrots;radishes;beets,Nov-Apr,false,10.4,2026-09-28
+1032,Mossy Oak Mushrooms,Holopaw,mushrooms,Year-round,true,23.6,2026-09-17
+1111,Nice Farm,saint cloud,eggs,jan-mar,true,25.0,2026-10-19
