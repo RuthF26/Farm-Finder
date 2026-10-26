@@ -1,11 +1,12 @@
 /*
  * Ruth Forzani
  * CEN 3024C - Software Development I
- * Module 7 - DMS Project Phase 1
- * Farm Finder: CRUD and Find Local Organic search.
+ * Module 8 - DMS Project Phase 2
+ * Farm Finder
  */
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -47,13 +48,35 @@ public class FarmManager {
     /** farm updates when one field is changed */
     public boolean updateFarm(int farmId, int attribute, String newValue) {
         Farm oldFarm = findFarmById(farmId);
-        if (oldFarm == null || attribute < 1 || attribute > 6 || newValue == null) {
+        if (oldFarm == null || attribute < 1 || attribute > 8 || newValue == null) {
             return false;
         }
         String value = newValue.trim();
-        Farm edited = new Farm(oldFarm.getFarmId(), oldFarm.getName(),
-                oldFarm.getCity(), oldFarm.getProducts(), oldFarm.getSeason(),
-                oldFarm.isOrganic(), oldFarm.getDistanceMiles(), LocalDate.now());
+        int newId = oldFarm.getFarmId();
+        LocalDate newDate = LocalDate.now();
+
+        if (attribute == 7) {
+            try {
+                newId = Integer.parseInt(value);
+                if (!validator.isValidId(newId)
+                        || (newId != farmId && isDuplicateId(newId))) {
+                    return false;
+                }
+            } catch (NumberFormatException exception) {
+                return false;
+            }
+        }
+        if (attribute == 8) {
+            try {
+                newDate = LocalDate.parse(value);
+            } catch (DateTimeParseException exception) {
+                return false;
+            }
+        }
+
+        Farm edited = new Farm(newId, oldFarm.getName(), oldFarm.getCity(),
+                oldFarm.getProducts(), oldFarm.getSeason(), oldFarm.isOrganic(),
+                oldFarm.getDistanceMiles(), newDate);
         switch (attribute) {
             case 1 -> edited.setName(value);
             case 2 -> edited.setCity(value);
@@ -76,6 +99,7 @@ public class FarmManager {
                     return false;
                 }
             }
+            case 7, 8 -> { }
             default -> { return false; }
         }
         if (!validator.isValidFarm(edited)) {
@@ -134,19 +158,24 @@ public class FarmManager {
     }
 
     /** custom action handling */
-    public ArrayList<Farm> findLocalOrganic(String product, double maxMiles) {
+    public ArrayList<Farm> findLocalFarms(String product, double maxMiles, boolean organicOnly) {
         ArrayList<Farm> matches = new ArrayList<>();
         if (!validator.isNotBlank(product) || !validator.isValidDistance(maxMiles)) {
             return matches;
         }
         for (Farm farm : farms) {
-            if (farm.isOrganic() && farm.sellsProduct(product)
+            if ((!organicOnly || farm.isOrganic()) && farm.sellsProduct(product)
                     && farm.getDistanceMiles() <= maxMiles) {
                 matches.add(farm);
             }
         }
         matches.sort(Comparator.comparingDouble(Farm::getDistanceMiles));
         return matches;
+    }
+
+    // original organic search.
+    public ArrayList<Farm> findLocalOrganic(String product, double maxMiles) {
+        return findLocalFarms(product, maxMiles, true);
     }
 
     public double calculateAverageDistance(ArrayList<Farm> matches) {

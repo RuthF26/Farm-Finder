@@ -1,7 +1,7 @@
 /*
  * Ruth Forzani
  * CEN 3024C - Software Development I
- * Module 7 - DMS Project Phase 1
+ * Module 8 - DMS Project Phase 2
  * Farm Finder
  */
 
@@ -39,12 +39,12 @@ public class FarmValidator {
         if (!isNotBlank(products)) {
             return false;
         }
-        for (String item : products.split(";")) {
-            if (isNotBlank(item)) {
-                return true;
+        for (String item : products.split(";", -1)) {
+            if (!isNotBlank(item)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public boolean isValidFarm(Farm farm) {
@@ -61,7 +61,7 @@ public class FarmValidator {
         }
         if (!isNotBlank(farm.getName()) || !isNotBlank(farm.getCity())
                 || !hasProduct(farm.getProducts())) {
-            return "Name, city, and products cannot be blank.";
+            return "Name, city, and products must be filled in. Use ; between products.";
         }
         if (!isSafeFileText(farm.getName()) || !isSafeFileText(farm.getCity())
                 || !isSafeFileText(farm.getProducts()) || !isSafeFileText(farm.getSeason())) {

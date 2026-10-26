@@ -1,7 +1,7 @@
 /*
  * Ruth Forzani
  * CEN 3024C - Software Development I
- * Module 7 - DMS Project Phase 1
+ * Module 8 - DMS Project Phase 2
  * Farm Finder
  */
 

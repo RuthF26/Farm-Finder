@@ -1,7 +1,7 @@
 /*
  * Ruth Forzani
  * CEN 3024C - Software Development I
- * Module 7 - DMS Project Phase 1: Logic and Input Validation
+ * Module 8 - DMS Project Phase 2
  * Farm Finder
  */
 
@@ -20,12 +20,16 @@ public class FarmApp {
     private String filePath;
 
     public FarmApp() {
-        this.manager = new FarmManager(new FarmFileRepository(","));
-        this.validator = new FarmValidator();
-        this.input = new Scanner(System.in);
-        this.filePath = "farms.txt";
+        this(new FarmManager(new FarmFileRepository(",")), new Scanner(System.in), "farms.txt");
     }
 
+    // For testing with sample input and a separate file.
+    FarmApp(FarmManager manager, Scanner input, String filePath) {
+        this.manager = manager;
+        this.validator = new FarmValidator();
+        this.input = input;
+        this.filePath = filePath;
+    }
 
     public static void main(String[] args) {
         new FarmApp().run();
@@ -35,13 +39,17 @@ public class FarmApp {
     public int run() {
         System.out.println("Welcome to Farm Finder - Osceola County!");
         try {
-            boolean keepRunning = true;
-            while (keepRunning) {
+            while (true) {
                 System.out.println(getMenuText());
-                int choice = readOptionInRange("Choose an option: ", 1, 7);
-                keepRunning = handleChoice(choice);
+                try {
+                    int choice = readOptionInRange("Choose an option: ", 1, 7);
+                    if (!handleChoice(choice)) {
+                        return 0;
+                    }
+                } catch (BackToMenu exception) {
+                    System.out.println("Returning to main menu. Completed updates are kept.");
+                }
             }
-            return 0;
         } catch (NoSuchElementException exception) {
             System.out.println("Input was closed. Program stopped without saving.");
             return 1;
@@ -54,9 +62,10 @@ public class FarmApp {
                 + "2. View all farms\n"
                 + "3. Update a farm\n"
                 + "4. Remove a farm\n"
-                + "5. Find Local Organic\n"
+                + "5. Find Local Farms\n"
                 + "6. Load farms from file\n"
-                + "7. Save & Exit";
+                + "7. Save & Exit\n"
+                + "Type B at any prompt to return to this menu.";
     }
 
     /** Here is the menu switch case */
@@ -74,14 +83,14 @@ public class FarmApp {
             case 2 -> System.out.println(manager.formatTable(manager.getAllFarms()));
             case 3 -> System.out.println(promptUpdate());
             case 4 -> System.out.println(promptRemove());
-            case 5 -> System.out.println(promptFindLocalOrganic());
+            case 5 -> System.out.println(promptFindLocalFarms());
             case 6 -> System.out.println(promptLoadFile());
             case 7 -> {
                 String message = saveAndExit();
                 System.out.println(message);
                 return !message.startsWith("Saved ");
             }
-            default -> System.out.println("Please choose 1–7.");
+            default -> System.out.println("Please choose 1-7.");
         }
         return true;
     }
@@ -111,26 +120,47 @@ public class FarmApp {
     private String promptUpdate() {
         System.out.println("\n--- Update a farm ---");
         int id = readInt("Farm ID to update: ");
-        Farm farm = manager.findFarmById(id);
-        if (farm == null) {
+        if (manager.findFarmById(id) == null) {
             return "No farm with ID " + id + ".";
         }
-        System.out.println("Current data: " + farm);
-        System.out.println("1. Name  2. City  3. Products  4. Season  5. Organic  6. Miles");
-        int attribute = readOptionInRange("Choose a field (1-6): ", 1, 6);
-        String value = switch (attribute) {
-            case 1 -> readText("New name: ");
-            case 2 -> readText("New city: ");
-            case 3 -> readProducts("New products: ");
-            case 4 -> readSeason("New season: ");
-            case 5 -> readYesNo("Organic? (Y/N): ") ? "Y" : "N";
-            case 6 -> Double.toString(readDouble("New miles (0-200): "));
-            default -> "";
-        };
-        if (!manager.updateFarm(id, attribute, value)) {
-            return "Update could not be completed.";
+        while (true) {
+            System.out.println("Current data: " + manager.findFarmById(id));
+            System.out.println("1. Name  2. City  3. Products  4. Season"
+                    + "  5. Organic  6. Miles  7. Farm ID  8. Last Updated  9. Done");
+            int attribute = readOptionInRange("Choose a field (1-9): ", 1, 9);
+            if (attribute == 9) {
+                return "Finished updating farm " + id + ".";
+            }
+            String value = switch (attribute) {
+                case 1 -> readText("New name: ");
+                case 2 -> readText("New city: ");
+                case 3 -> readProducts("New products: ");
+                case 4 -> readSeason("New season: ");
+                case 5 -> readYesNo("Organic? (Y/N): ") ? "Y" : "N";
+                case 6 -> Double.toString(readDouble("New miles (0-200): "));
+                case 7 -> Integer.toString(readNewId(id));
+                case 8 -> readDate("New date (YYYY-MM-DD): ").toString();
+                default -> "";
+            };
+            if (manager.updateFarm(id, attribute, value)) {
+                if (attribute == 7) {
+                    id = Integer.parseInt(value);
+                }
+                System.out.println("Farm updated. Choose another field or 9 to finish.");
+            } else {
+                System.out.println("Update could not be completed.");
+            }
         }
-        return "Farm " + id + " updated.\n" + manager.findFarmById(id);
+    }
+
+    private int readNewId(int currentId) {
+        while (true) {
+            int id = readInt("New farm ID: ");
+            if (id == currentId || manager.findFarmById(id) == null) {
+                return id;
+            }
+            System.out.println("ID " + id + " already exists. Try another ID.");
+        }
     }
 
     private String promptRemove() {
@@ -148,14 +178,19 @@ public class FarmApp {
     }
 
     /** filtering, sorting and looking for the average distance a.k.a the custom action*/
-    private String promptFindLocalOrganic() {
-        System.out.println("\n--- Find Local Organic ---");
+    private String promptFindLocalFarms() {
+        System.out.println("\n--- Find Local Farms ---");
         String product = readText("Product to find: ");
         double miles = readDouble("Maximum miles (0-200): ");
-        ArrayList<Farm> matches = manager.findLocalOrganic(product, miles);
+        boolean organicOnly = readYesNo("Organic farms only? (Y/N): ");
+        ArrayList<Farm> matches = manager.findLocalFarms(product, miles, organicOnly);
         if (matches.isEmpty()) {
-            return "No organic farms selling " + product + " within "
-                    + formatMiles(miles) + " miles.";
+            if (organicOnly && !manager.findLocalFarms(product, miles, false).isEmpty()) {
+                return "This product is available, but not at an organic farm within "
+                        + formatMiles(miles) + " miles. Try again with organic = N.";
+            }
+            return "No " + (organicOnly ? "organic " : "") + "farms selling "
+                    + product + " within " + formatMiles(miles) + " miles.";
         }
         double average = manager.calculateAverageDistance(matches);
         return manager.formatTable(matches) + "Matches: " + matches.size()
@@ -181,6 +216,10 @@ public class FarmApp {
 
     /** saves and exits */
     private String saveAndExit() {
+        if (manager.getFarmCount() == 0
+                && !readYesNo("No farms are loaded. Save an empty file? (Y/N): ")) {
+            return "Save cancelled. Load or add farms first.";
+        }
         if (manager.saveToFile(filePath)) {
             return "Saved " + manager.getFarmCount() + " farm(s) to " + filePath
                     + ". Goodbye!";
@@ -198,8 +237,9 @@ public class FarmApp {
                     return number;
                 }
             } catch (NumberFormatException exception) {
+                // try again.
             }
-            System.out.println("Please choose " + min + "–" + max + ".");
+            System.out.println("Please choose " + min + "-" + max + ".");
         }
     }
 
@@ -212,6 +252,7 @@ public class FarmApp {
                     return number;
                 }
             } catch (NumberFormatException exception) {
+                // try again.
             }
             System.out.println("Enter a whole number above 0.");
         }
@@ -226,6 +267,7 @@ public class FarmApp {
                     return miles;
                 }
             } catch (NumberFormatException exception) {
+                // try again.
             }
             System.out.println("Enter a number from 0 to 200.");
         }
@@ -250,7 +292,7 @@ public class FarmApp {
             if (validator.hasProduct(products)) {
                 return products;
             }
-            System.out.println("Please enter at least one product, not only semicolons.");
+            System.out.println("Use at least one product and do not leave empty items between ;.");
         }
     }
 
@@ -292,12 +334,17 @@ public class FarmApp {
         }
     }
 
+    /** B returns to the main menu */
     private String readRawLine(String prompt) {
         System.out.print(prompt);
         if (!input.hasNextLine()) {
             throw new NoSuchElementException("Input stream closed");
         }
-        return input.nextLine().trim();
+        String text = input.nextLine().trim();
+        if (text.equalsIgnoreCase("B")) {
+            throw new BackToMenu();
+        }
+        return text;
     }
 
     /** miles formating. */
@@ -307,4 +354,6 @@ public class FarmApp {
         }
         return Double.toString(miles);
     }
+
+    private static class BackToMenu extends RuntimeException { }
 }
