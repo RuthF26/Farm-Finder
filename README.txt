@@ -28,6 +28,9 @@ farms.txt contains 20 sample farm records.
 To load a file, choose option 6 and enter its name (for example, farms.txt).
 The text file contain sample data for this school project.
 
+11-3-2026 UPDATE
+There is now a GUI version of the Farm Finder
+
 NOTES
 The program checks user input and displays messages for invalid entries.
 Data is stored in memory while the program runs. Save and Exit writes the
