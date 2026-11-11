@@ -1,4 +1,4 @@
-FARM FINDER - MODULE 7: PHASE 1
+FARM FINDER - MODULE 7: PHASE 4 GUI
 Ruth Forzani
 CEN 3024C - Software Development I
 
